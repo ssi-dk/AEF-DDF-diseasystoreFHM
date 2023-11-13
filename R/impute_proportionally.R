@@ -1,4 +1,5 @@
-# function to do proportional imputing by group
+#'  function to do proportional imputing by group
+#'  @export
 impute_proportionally <- function(x, y, value_name, merge_name, na_zero = FALSE) {
 
   if (dim(x)[2]!=3) stop("x must be on long format with 3 columns")

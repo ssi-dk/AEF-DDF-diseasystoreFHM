@@ -1,5 +1,7 @@
 test_that("DiseasystoreFHM works", {
 
+  library(diseasystore)
+
   # Check we can read the data directly online
   if (curl::has_internet()) {
     expect_no_error(ds <- DiseasystoreFHM$new(
@@ -13,12 +15,10 @@ test_that("DiseasystoreFHM works", {
       purrr::walk(~ expect_no_error(ds$get_feature(.)))
   }
 
-
   # Then we create a temporary directory for the Folkesundhedsmyndigheden data
   remote_conn <- options() %.% diseasystore.DiseasystoreFHM.remote_conn
 
   tmp_dir <- stringr::str_replace_all(tempdir(), r"{\\}", .Platform$file.sep)
-  options(diseasystore.DiseasystoreFHM.source_conn = tmp_dir)
 
   sqlite_path <- file.path(tmp_dir, "diseasystore_fhm.sqlite")
   if (file.exists(sqlite_path)) {
@@ -33,8 +33,13 @@ test_that("DiseasystoreFHM works", {
   # Then we download the first n rows of each data set of interest
   purrr::walk2(remote_conn, names(remote_conn), ~ {
     readr::read_csv(.x, show_col_types = FALSE, progress = FALSE) |>
-      readr::write_csv(file.path(tmp_dir, .y))
+      readr::write_csv(file.path(tmp_dir, paste0(.y, ".csv")))
   })
+
+  source_conn <- paste0(tmp_dir, .Platform$file.sep, names(remote_conn), ".csv")
+  names(source_conn) <- names(remote_conn)
+  options(diseasystore.DiseasystoreFHM.source_conn = source_conn)
+
 
   # Initialize without start_date and end_date
   expect_no_error(ds <- DiseasystoreFHM$new(verbose = FALSE))
@@ -136,7 +141,7 @@ test_that("DiseasystoreFHM works", {
   }
 
   # Set start and end dates for the rest of the tests
-  start_date <- as.Date("2020-03-01")
+  start_date <- as.Date("2020-03-02")
   end_date   <- as.Date("2020-04-30")
 
   # First check we can aggregate without an aggregation

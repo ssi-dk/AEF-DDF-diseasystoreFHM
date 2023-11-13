@@ -33,6 +33,7 @@ DiseasystoreFHM <- R6::R6Class( # nolint: object_name_linter.
 )
 
 
+#' @importFrom rlang .data
 fhm_population_ <- function() {
   diseasystore::FeatureHandler$new(
     compute = function(start_date, end_date, slice_ts, source_conn) {
@@ -43,7 +44,7 @@ fhm_population_ <- function() {
 
       # We use demography data from `diseasy`s contact_basis data set
       out <- diseasy::contact_basis$SE$demography |>
-        dplyr::transmute("key_age" = .data$age, .data$age, .data$population) |>
+        dplyr::transmute("key_age" = .data$age, .data$age, "n_population" = .data$population) |>
         dplyr::mutate(valid_from = as.Date("2020-01-01"), valid_until = as.Date(NA))
 
       return(out)
@@ -53,6 +54,7 @@ fhm_population_ <- function() {
 }
 
 
+#' @importFrom rlang .data
 fhm_admission_ <- function() {
   diseasystore::FeatureHandler$new(
     compute = function(start_date, end_date, slice_ts, source_conn) {
@@ -60,8 +62,6 @@ fhm_admission_ <- function() {
       checkmate::assert_date(start_date, lower = as.Date("2020-03-02"), add = coll)
       checkmate::assert_date(end_date,   upper = as.Date("2022-03-27"), add = coll)
       checkmate::reportAssertions(coll)
-
-      library(data.table)
 
       # There is no one data source for the admission data stratified at the level we want.
       # So we have to impute data based on three different data sources
@@ -83,7 +83,7 @@ fhm_admission_ <- function() {
         dplyr::transmute("date" = .data$datum,
                          "n_admission_non_icu" = .data$`Inskrivna i slutenvård - antal`,
                          "n_admission_icu" = .data$`Inskrivna i intensivvård - antal`) |>
-        dplyr::mutate(across(tidyselect::starts_with("n_admission_"), ~ as.numeric(ifelse(. == "-", NA, .))))
+        dplyr::mutate(dplyr::across(tidyselect::starts_with("n_admission_"), ~ as.numeric(ifelse(. == "-", NA, .))))
 
 
 
@@ -101,10 +101,10 @@ fhm_admission_ <- function() {
       # corresponding weeks before trimming fully after imputing
       daily_admissions <- daily_admissions |>
         dplyr::filter(lubridate::floor_date(start_date, week_start = 1, unit = "day") <= .data$date,
-                      .data$date <= lubridate::ceiling_date(end_date, week_start = 1, unit = "day"))
+                      .data$date <= lubridate::ceiling_date(end_date, week_start = 1, unit = "week"))
 
       # Perform the imputing
-      out <- impute_proportionally(daily_admissions, weekly_admissions,
+      out <- impute_proportionally(daily_admissions, weekly_admissions,                                                 # nolint: object_usage_linter
                                    value_name = "n_admission", merge_name = "week") |>
         as.data.frame() |>
         dplyr::select(!"week")
@@ -112,7 +112,7 @@ fhm_admission_ <- function() {
       # Fully trim
       out <- out |>
         dplyr::filter(start_date <= date, date <= end_date) |>
-        dplyr::transmute("date", "age_group", "n_admission",
+        dplyr::transmute(.data$date, .data$age_group, .data$n_admission,
                          "valid_from" = .data$date, "valid_until" = .data$date + lubridate::days(1))
 
       return(out)
