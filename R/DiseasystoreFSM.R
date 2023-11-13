@@ -95,11 +95,26 @@ folkesundhedsmyndigheden_admission_ <- function() {
                          "n_admission" = sum(.data$n_admission_non_icu, .data$n_admission_icu, na.rm = TRUE)) |>
         dplyr::ungroup()
 
+
+      # Trim to requested weeks
+      # The imputing function works with full weeks, so we roughly trim to the
+      # corresponding weeks before trimming fully after imputing
+      daily_admissions <- daily_admissions |>
+        dplyr::filter(lubridate::floor_date(start_date, week_start = 1) <= .data$date,
+                      .data$date <= lubridate::ceiling_date(end_date, week_start = 1))
+
+
       # Perform the imputing
       out <- impute_proportionally(daily_admissions, weekly_admissions,
                                    value_name = "n_admission", merge_name = "week") |>
         as.data.frame() |>
         dplyr::select(!"week")
+
+      # Fully trim
+      out <- out |>
+        dplyr::filter(start_date <= date, date <= end_date) |>
+        dplyr::transmute("date", "age_group", "n_admission",
+                         "valid_from" = .data$date, "valid_until" = .data$date + lubridate::days(1))
 
       return(out)
     },
