@@ -1,39 +1,39 @@
-#' @title feature store handler of Swedish Folkesundhedsmyndighedens data
+#' @title feature store handler of Swedish FHMs data
 #'
 #' @description
-#'   This `DiseasystoreFSM` [R6][R6::R6Class] brings support for using the Swedish Folkesundhedsmyndigheden data.
+#'   This `DiseasystoreFHM` [R6][R6::R6Class] brings support for using the Swedish FHM data.
 #' @examples
-#'   ds <- DiseasystoreFSM$new(source_conn = ".",
+#'   ds <- DiseasystoreFHM$new(source_conn = ".",
 #'                             target_conn = DBI::dbConnect(RSQLite::SQLite()))
 #'
 #' @return
-#'   A new instance of the `DiseasystoreFSM` [R6][R6::R6Class] class.
+#'   A new instance of the `DiseasystoreFHM` [R6][R6::R6Class] class.
 #' @export
-DiseasystoreFSM <- R6::R6Class( # nolint: object_name_linter.
-  classname = "DiseasystoreFSM",
+DiseasystoreFHM <- R6::R6Class( # nolint: object_name_linter.
+  classname = "DiseasystoreFHM",
   inherit = diseasystore::DiseasystoreBase,
 
   private = list(
     fs_generic = NULL,
     fs_specific = list("population" = "n_population",
                        "admission"  = "n_admission"),
-    .label = "Folkesundhedsmyndigheden",
+    .label = "FHM",
 
-    folkesundhedsmyndigheden_population = NULL,
-    folkesundhedsmyndigheden_admission  = NULL,
+    fhm_population = NULL,
+    fhm_admission  = NULL,
 
     initialize_feature_handlers = function() {
 
       # Here we initialize each of the feature handlers for the class
       # See the documentation above at the corresponding methods
-      private$folkesundhedsmyndigheden_population <- folkesundhedsmyndigheden_population_()
-      private$folkesundhedsmyndigheden_admission  <- folkesundhedsmyndigheden_admission_()
+      private$fhm_population <- fhm_population_()
+      private$fhm_admission  <- fhm_admission_()
     }
   )
 )
 
 
-folkesundhedsmyndigheden_population_ <- function() {
+fhm_population_ <- function() {
   diseasystore::FeatureHandler$new(
     compute = function(start_date, end_date, slice_ts, source_conn) {
       coll <- checkmate::makeAssertCollection()
@@ -53,7 +53,7 @@ folkesundhedsmyndigheden_population_ <- function() {
 }
 
 
-folkesundhedsmyndigheden_admission_ <- function() {
+fhm_admission_ <- function() {
   diseasystore::FeatureHandler$new(
     compute = function(start_date, end_date, slice_ts, source_conn) {
       coll <- checkmate::makeAssertCollection()
@@ -100,9 +100,8 @@ folkesundhedsmyndigheden_admission_ <- function() {
       # The imputing function works with full weeks, so we roughly trim to the
       # corresponding weeks before trimming fully after imputing
       daily_admissions <- daily_admissions |>
-        dplyr::filter(lubridate::floor_date(start_date, week_start = 1) <= .data$date,
-                      .data$date <= lubridate::ceiling_date(end_date, week_start = 1))
-
+        dplyr::filter(lubridate::floor_date(start_date, week_start = 1, unit = "day") <= .data$date,
+                      .data$date <= lubridate::ceiling_date(end_date, week_start = 1, unit = "day"))
 
       # Perform the imputing
       out <- impute_proportionally(daily_admissions, weekly_admissions,
@@ -125,11 +124,11 @@ folkesundhedsmyndigheden_admission_ <- function() {
 
 # Set default options for the package related to the Google COVID-19 store
 rlang::on_load({
-  options("diseasystore.DiseasystoreFSM.remote_conn" = list(
+  options("diseasystore.DiseasystoreFHM.remote_conn" = list(
     "weekly_admissions" = "https://static.dwcdn.net/data/JQWM4.csv",
     "daily_admissions"  = "https://static.dwcdn.net/data/fJECo.csv"
   ))
-  options("diseasystore.DiseasystoreFSM.source_conn" = diseasystore::diseasyoption("remote_conn", "DiseasystoreFSM"))
-  options("diseasystore.DiseasystoreFSM.target_conn" = "")
-  options("diseasystore.DiseasystoreFSM.target_schema" = "")
+  options("diseasystore.DiseasystoreFHM.source_conn" = diseasystore::diseasyoption("remote_conn", "DiseasystoreFHM"))
+  options("diseasystore.DiseasystoreFHM.target_conn" = "")
+  options("diseasystore.DiseasystoreFHM.target_schema" = "")
 })

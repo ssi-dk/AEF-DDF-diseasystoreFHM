@@ -1,8 +1,8 @@
-test_that("DiseasystoreFSM works", {
+test_that("DiseasystoreFHM works", {
 
   # Check we can read the data directly online
   if (curl::has_internet()) {
-    expect_no_error(ds <- DiseasystoreFSM$new(
+    expect_no_error(ds <- DiseasystoreFHM$new(
       target_conn = DBI::dbConnect(RSQLite::SQLite()),
       start_date = as.Date("2020-03-02"),
       end_date = as.Date("2020-03-02"),
@@ -15,19 +15,19 @@ test_that("DiseasystoreFSM works", {
 
 
   # Then we create a temporary directory for the Folkesundhedsmyndigheden data
-  remote_conn <- options() %.% diseasystore.DiseasystoreFSM.remote_conn
+  remote_conn <- options() %.% diseasystore.DiseasystoreFHM.remote_conn
 
   tmp_dir <- stringr::str_replace_all(tempdir(), r"{\\}", .Platform$file.sep)
-  options(diseasystore.DiseasystoreFSM.source_conn = tmp_dir)
+  options(diseasystore.DiseasystoreFHM.source_conn = tmp_dir)
 
-  sqlite_path <- file.path(tmp_dir, "diseasystore_fsm.sqlite")
+  sqlite_path <- file.path(tmp_dir, "diseasystore_fhm.sqlite")
   if (file.exists(sqlite_path)) {
     closeAllConnections()
     stopifnot("Could not delete SQLite DB before tests" = file.remove(sqlite_path))
   }
 
   target_conn <- \() DBI::dbConnect(RSQLite::SQLite(), sqlite_path)
-  options(diseasystore.DiseasystoreFSM.target_conn = target_conn)
+  options(diseasystore.DiseasystoreFHM.target_conn = target_conn)
 
 
   # Then we download the first n rows of each data set of interest
@@ -37,11 +37,11 @@ test_that("DiseasystoreFSM works", {
   })
 
   # Initialize without start_date and end_date
-  expect_no_error(ds <- DiseasystoreFSM$new(verbose = FALSE))
+  expect_no_error(ds <- DiseasystoreFHM$new(verbose = FALSE))
 
   # Check feature store has been created
-  checkmate::expect_class(ds, "DiseasystoreFSM")
-  expect_equal(ds %.% label, "Google COVID-19")
+  checkmate::expect_class(ds, "DiseasystoreFHM")
+  expect_equal(ds %.% label, "FHM")
 
 
   # SCDB v0.1 gives a warning if database has no tables when used. We suppress this warning here
@@ -67,7 +67,7 @@ test_that("DiseasystoreFSM works", {
   # Attempt to get features from the feature store
   # then check that they match the expected value from the generators
   purrr::walk2(ds$available_features, names(ds$fs_map), ~ {
-    start_date <- as.Date("2020-03-01")
+    start_date <- as.Date("2020-03-02")
     end_date   <- as.Date("2020-04-30")
 
     feature <- ds$get_feature(.x, start_date = start_date, end_date = end_date) |>
@@ -99,7 +99,7 @@ test_that("DiseasystoreFSM works", {
   # Attempt to get features from the feature store (using different dates)
   # then check that they match the expected value from the generators
   purrr::walk2(ds$available_features, names(ds$fs_map), ~ {
-    start_date <- as.Date("2020-03-01")
+    start_date <- as.Date("2020-03-02")
     end_date   <- as.Date("2020-05-31")
 
     feature <- ds$get_feature(.x, start_date = start_date, end_date = end_date) |>
