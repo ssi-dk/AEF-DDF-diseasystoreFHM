@@ -65,38 +65,39 @@ folkesundhedsmyndigheden_admission_ <- function() {
 
       # There is no one data source for the admission data stratified at the level we want.
       # So we have to impute data based on three different data sources
-      weeky_admissions      <- data.table::fread(purrr::pluck(source_conn, "weekly_admissions"),
-                                                 drop = "Obs", data.table = TRUE)
-      weekly_icu_admissions <- data.table::fread(purrr::pluck(source_conn, "weekly_icu_admissions"),
-                                                 drop = "Obs", data.table = TRUE)
-      daily_admissions      <- data.table::fread(purrr::pluck(source_conn, "daily_admissions"),
-                                                 drop = "Obs", data.table = TRUE)
 
-      # reg = regular, the sum of reg and icu is total admissions
-      adm_daily <- daily_admissions[,c(1,3,5),with=FALSE]
-      names(adm_daily) <- c("date","n_admissions_reg","n_admissions_icu")
-      adm_daily[, n_admissions_reg := as.integer(n_admissions_reg)]
-      adm_daily[, n_admissions_icu := as.integer(n_admissions_icu)]
+      # The "weekly_admissions" data contains the weekly distribution of ALL admissions by
+      # age group. We collect this data and transform to a long format
+      weekly_admissions <- purrr::pluck(source_conn, "weekly_admissions") |>
+        readr::read_csv(show_col_types = FALSE) |>
+        dplyr::select(!"Obs") |>
+        dplyr::rename("age_group" = "aldrar") |>
+        tidyr::pivot_longer(!"age_group", values_to = "n_admission",
+                            names_to = "week", names_transform = ~ stringr::str_replace(., "V", "-W"))
 
-      # change from SWE to UK notation in weeks
-      #adm_daily[,week := paste0(format(date,"%G"),"W" ,format(date,"%V"))]
-      adm_daily[, week := format(date,"%G-W%V")]
 
-      # put agegroup admissions on long format
-      tmp <- as.data.table(t(weeky_admissions  [,-1]))
-      names(tmp) <- as.character(unlist(weeky_admissions  [,1]))
-      tmp$week <- names(weeky_admissions  [,-1])
-      tmp$week <- gsub("V","-W",tmp$week)
-      adm_week_agegr <- melt(tmp)
-      names(adm_week_agegr)[2:3] <- c("ageGr","n_admissions")
+      # The "daily_admissions" data contains, among other things, number of people in hospital stratified
+      # into "ICU" and "non-ICU" groups.
+      daily_admissions <- purrr::pluck(source_conn, "daily_admissions") |>
+        readr::read_csv(show_col_types = FALSE) |>
+        dplyr::transmute("date" = .data$datum,
+                         "n_admission_non_icu" = .data$`Inskrivna i slutenvård - antal`,
+                         "n_admission_icu" = .data$`Inskrivna i intensivvård - antal`) |>
+        dplyr::mutate(across(tidyselect::starts_with("n_admission_"), ~ as.numeric(ifelse(. == "-", NA, .))))
 
-      #x <- adm_daily[,.(date,n_admissions_reg = n_admissions_reg,week)]
-      x <- adm_daily[,.(n_admissions =
-                          sum(c(n_admissions_reg,n_admissions_icu),na.rm=TRUE),week=week[1]),date]
-      y <- adm_week_agegr
-      value.name <- "n_admissions"
-      merge.name <- "week"
 
+
+      # Add the week to the daily admissions data so everything can be coupled by week.
+      # Further, combine stratified admission data to get total admissions as in the weekly data
+      daily_admissions <- daily_admissions |>
+        dplyr::rowwise() |>
+        dplyr::transmute(.data$date, week = format(.data$date, "%G-W%V"),
+                         "n_admission" = sum(.data$n_admission_non_icu, .data$n_admission_icu, na.rm = TRUE)) |>
+        dplyr::ungroup()
+
+      x <- daily_admissions
+      y <- weekly_admissions
+      
       # funtion to do proportional imputing by group
       imputeprop <- function(x, y, value.name, merge.name,
                             na.zero = FALSE) {
@@ -243,9 +244,8 @@ folkesundhedsmyndigheden_admission_ <- function() {
 # Set default options for the package related to the Google COVID-19 store
 rlang::on_load({
   options("diseasystore.DiseasystoreFSM.remote_conn" = list(
-    "weekly_admissions"     = "https://static.dwcdn.net/data/JQWM4.csv",
-    "weekly_icu_admissions" = "https://static.dwcdn.net/data/oGaz9.csv",
-    "daily_admissions"      = "https://static.dwcdn.net/data/fJECo.csv"
+    "weekly_admissions" = "https://static.dwcdn.net/data/JQWM4.csv",
+    "daily_admissions"  = "https://static.dwcdn.net/data/fJECo.csv"
   ))
   options("diseasystore.DiseasystoreFSM.source_conn" = diseasystore::diseasyoption("remote_conn", "DiseasystoreFSM"))
   options("diseasystore.DiseasystoreFSM.target_conn" = "")
