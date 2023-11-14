@@ -1,16 +1,16 @@
 #' @title feature store handler of Swedish FHMs data
 #'
 #' @description
-#'   This `DiseasystoreFHM` [R6][R6::R6Class] brings support for using the Swedish FHM data.
+#'   This `DiseasystoreFhm` [R6][R6::R6Class] brings support for using the Swedish FHM data.
 #' @examples
-#'   ds <- DiseasystoreFHM$new(source_conn = ".",
+#'   ds <- DiseasystoreFhm$new(source_conn = ".",
 #'                             target_conn = DBI::dbConnect(RSQLite::SQLite()))
 #'
 #' @return
-#'   A new instance of the `DiseasystoreFHM` [R6][R6::R6Class] class.
+#'   A new instance of the `DiseasystoreFhm` [R6][R6::R6Class] class.
 #' @export
-DiseasystoreFHM <- R6::R6Class( # nolint: object_name_linter.
-  classname = "DiseasystoreFHM",
+DiseasystoreFhm <- R6::R6Class( # nolint: object_name_linter.
+  classname = "DiseasystoreFhm",
   inherit = diseasystore::DiseasystoreBase,
 
   private = list(
@@ -124,11 +124,11 @@ fhm_admission_ <- function() {
 
 # Set default options for the package related to the Google COVID-19 store
 rlang::on_load({
-  options("diseasystore.DiseasystoreFHM.remote_conn" = list(
+  options("diseasystore.DiseasystoreFhm.remote_conn" = list(
     "weekly_admissions" = "https://static.dwcdn.net/data/JQWM4.csv",
     "daily_admissions"  = "https://static.dwcdn.net/data/fJECo.csv"
   ))
-  options("diseasystore.DiseasystoreFHM.source_conn" = diseasystore::diseasyoption("remote_conn", "DiseasystoreFHM"))
-  options("diseasystore.DiseasystoreFHM.target_conn" = "")
-  options("diseasystore.DiseasystoreFHM.target_schema" = "")
+  options("diseasystore.DiseasystoreFhm.source_conn" = diseasystore::diseasyoption("remote_conn", "DiseasystoreFhm"))
+  options("diseasystore.DiseasystoreFhm.target_conn" = "")
+  options("diseasystore.DiseasystoreFhm.target_schema" = "")
 })
