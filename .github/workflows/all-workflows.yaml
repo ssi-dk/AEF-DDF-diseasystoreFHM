@@ -21,7 +21,6 @@ jobs:
       event_name: ${{ github.event_name }}
       run_id: ${{ github.run_id }}
       main_branches: main
-      skip: R-CMD-Check
 
       # code-coverage creates data bases for the tests. Here you can specify the schemas you need for the workflow
       backend_skip: mssql
