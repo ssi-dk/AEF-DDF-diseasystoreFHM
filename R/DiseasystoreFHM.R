@@ -1,4 +1,4 @@
-#' @title feature store handler of Swedish FHMs data
+#' @title feature store handler of Swedish Folkhalsomyndigheten data
 #'
 #' @description
 #'   This `DiseasystoreFhm` [R6][R6::R6Class] brings support for using the Swedish FHM data.
@@ -16,10 +16,12 @@ DiseasystoreFhm <- R6::R6Class( # nolint: object_name_linter.
   private = list(
     fs_generic = NULL,
     fs_specific = list("population" = "n_population",
+                       "age_group"  = "age_group",
                        "admission"  = "n_admission"),
     .label = "FHM",
 
     fhm_population = NULL,
+    fhm_age_group  = NULL,
     fhm_admission  = NULL,
 
     initialize_feature_handlers = function() {
@@ -27,6 +29,7 @@ DiseasystoreFhm <- R6::R6Class( # nolint: object_name_linter.
       # Here we initialize each of the feature handlers for the class
       # See the documentation above at the corresponding methods
       private$fhm_population <- fhm_population_()
+      private$fhm_age_group  <- fhm_age_group_()
       private$fhm_admission  <- fhm_admission_()
     }
   )
@@ -42,9 +45,31 @@ fhm_population_ <- function() {
       checkmate::assert_date(end_date,   upper = as.Date("2022-03-27"), add = coll)
       checkmate::reportAssertions(coll)
 
-      # We use demography data from `diseasy`s contact_basis data set
-      out <- diseasy::contact_basis$SE$demography |>
-        dplyr::transmute("key_age" = .data$age, .data$age, "n_population" = .data$population) |>
+      # We use the bundled population data
+      out <- swedens_population |>
+        dplyr::transmute("key_age_group" = as.character(.data$age_group), .data$age_group,
+                         "n_population" = .data$population) |>
+        dplyr::mutate(valid_from = as.Date("2020-01-01"), valid_until = as.Date(NA))
+
+      return(out)
+    },
+    key_join = diseasystore::key_join_sum
+  )
+}
+
+
+#' @importFrom rlang .data
+fhm_age_group_ <- function() {
+  diseasystore::FeatureHandler$new(
+    compute = function(start_date, end_date, slice_ts, source_conn) {
+      coll <- checkmate::makeAssertCollection()
+      checkmate::assert_date(start_date, lower = as.Date("2020-03-02"), add = coll)
+      checkmate::assert_date(end_date,   upper = as.Date("2022-03-27"), add = coll)
+      checkmate::reportAssertions(coll)
+
+      # Pull the age groups from the bundled population data
+      out <- swedens_population |>
+        dplyr::transmute("key_age_group" = .data$age_group, .data$age_group) |>
         dplyr::mutate(valid_from = as.Date("2020-01-01"), valid_until = as.Date(NA))
 
       return(out)
@@ -71,7 +96,8 @@ fhm_admission_ <- function() {
       weekly_admissions <- purrr::pluck(source_conn, "weekly_admissions") |>
         readr::read_csv(show_col_types = FALSE) |>
         dplyr::select(!"Obs") |>
-        dplyr::rename("age_group" = "aldrar") |>
+        dplyr::mutate("age_group" = dplyr::if_else(.data$aldrar == "0-9", "00-09", .data$aldrar)) |>
+        dplyr::select("age_group", tidyselect::matches(r"{202\dV\d+}")) |>
         tidyr::pivot_longer(!"age_group", values_to = "n_admission",
                             names_to = "week", names_transform = ~ stringr::str_replace(., "V", "-W"))
 
@@ -112,7 +138,7 @@ fhm_admission_ <- function() {
       # Fully trim
       out <- out |>
         dplyr::filter(start_date <= date, date <= end_date) |>
-        dplyr::transmute(.data$date, .data$age_group, .data$n_admission,
+        dplyr::transmute("key_age_group" = .data$age_group, .data$n_admission,
                          "valid_from" = .data$date, "valid_until" = .data$date + lubridate::days(1))
 
       return(out)

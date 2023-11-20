@@ -1,0 +1,27 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+  workflow_dispatch:
+
+name: Run all
+
+jobs:
+
+  # We call the reuseable workflow that triggers all AEF-DDF workflows
+  run-all-AEF-DFF-workflows:
+    name: ⚙️ Call dispatcher
+    uses: ssi-dk/AEF-DDF/.github/workflows/workflow-dispatcher.yaml@workflows
+    with:
+      # We pass information about the triggering event
+      event_name: ${{ github.event_name }}
+      run_id: ${{ github.run_id }}
+      main_branches: main
+
+      # code-coverage creates data bases for the tests. Here you can specify the schemas you need for the workflow
+      backend_skip: mssql
+    secrets: inherit

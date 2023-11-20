@@ -1,23 +1,26 @@
-Package: diseasystoreFSM
-Title: diseasystore extensions for the Swedish Folkesundhedsmyndigheden
+Package: diseasystoreFHM
+Title: diseasystore extensions for the Swedish Folkhalsomyndigheten
 Version: 0.1.0
 Authors@R:
-    c(person("Rasmus Skytte", "Randløv", , "rske@ssi.dk", c("aut", "cre"),
+    c(person("Rasmus Skytte", "Randl\u00F8v", , "rske@ssi.dk", c("aut", "cre"),
             comment = c(ORCID = "0000-0002-5860-3838")),
       person("Kaare", "Gr\u00E6sb\u00F8ll", , "kagr@ssi.dk", role = c("aut"),
              comment = c(ORCID = "0000-0002-6258-8212")))
 Description:
     This package extends the `diseasy` feature store data model with additional data from the Swedish
-    Folkesundhedsmyndigheden (public health institute of Sweden).
+    Folkhalsomyndigheten (public health institute of Sweden).
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Language: en-GB
 Depends:
-    data.table
+    data.table,
+    R (>= 2.10)
 Imports:
     checkmate,
     DBI,
+    devtools,
     diseasystore,
     dplyr,
     glue,
@@ -29,4 +32,6 @@ Imports:
     tidyselect
 Suggests:
     testthat (>= 3.0.0)
+Remotes: ssi-dk/diseasystore
 Config/testthat/edition: 3
+LazyData: true
