@@ -3,7 +3,7 @@
 \docType{data}
 \name{swedens_population}
 \alias{swedens_population}
-\title{Swedens population}
+\title{Sweden's population}
 \source{
 U.S. Census Bureau. (n.d.). \emph{International Database: World Population Estimates and Projections}.
 U.S. Department of Commerce. Retrieved

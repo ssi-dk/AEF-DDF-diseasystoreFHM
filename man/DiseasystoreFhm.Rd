@@ -2,7 +2,7 @@
 % Please edit documentation in R/DiseasystoreFhm.R
 \name{DiseasystoreFhm}
 \alias{DiseasystoreFhm}
-\title{feature store handler of Swedish FHMs data}
+\title{feature store handler of Swedish Folkhalsomyndigheten data}
 \value{
 A new instance of the \code{DiseasystoreFhm} \link[R6:R6Class]{R6} class.
 }
