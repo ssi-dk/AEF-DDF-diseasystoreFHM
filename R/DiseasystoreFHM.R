@@ -46,8 +46,8 @@ fhm_population_ <- function() {
       # We use demography data from `diseasy`s contact_basis data set
       out <- diseasy::contact_basis$SE$demography |>
         dplyr::transmute(.data$age, "n_population" = .data$population) |>
-        dplyr::mutate(age_group = cut(.data$age, breaks = c((0:9)*10, Inf), right = FALSE,
-                                      labels = diseasystore::age_labels((0:9)*10))) |>
+        dplyr::mutate(age_group = cut(.data$age, breaks = c((0:9) * 10, Inf), right = FALSE,
+                                      labels = diseasystore::age_labels((0:9) * 10))) |>
         dplyr::summarise(n_population = sum(.data$n_population), .by = "age_group") |>
         dplyr::transmute("age_group" = as.character(.data$age_group), .data$n_population) |>
         dplyr::mutate(valid_from = as.Date("2020-01-01"), valid_until = as.Date(NA))
