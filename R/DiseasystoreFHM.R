@@ -16,6 +16,7 @@ DiseasystoreFhm <- R6::R6Class( # nolint: object_name_linter.
   private = list(
     fs_generic = NULL,
     fs_specific = list("population" = "n_population",
+                       "population" = "age_group",
                        "admission"  = "n_admission"),
     .label = "FHM",
 
@@ -44,7 +45,11 @@ fhm_population_ <- function() {
 
       # We use demography data from `diseasy`s contact_basis data set
       out <- diseasy::contact_basis$SE$demography |>
-        dplyr::transmute("key_age" = .data$age, .data$age, "n_population" = .data$population) |>
+        dplyr::transmute(.data$age, "n_population" = .data$population) |>
+        dplyr::mutate(age_group = cut(.data$age, breaks = c((0:9)*10, Inf), right = FALSE,
+                                      labels = diseasystore::age_labels((0:9)*10))) |>
+        dplyr::summarise(n_population = sum(.data$n_population), .by = "age_group") |>
+        dplyr::transmute("age_group" = as.character(.data$age_group), .data$n_population) |>
         dplyr::mutate(valid_from = as.Date("2020-01-01"), valid_until = as.Date(NA))
 
       return(out)
@@ -71,7 +76,8 @@ fhm_admission_ <- function() {
       weekly_admissions <- purrr::pluck(source_conn, "weekly_admissions") |>
         readr::read_csv(show_col_types = FALSE) |>
         dplyr::select(!"Obs") |>
-        dplyr::rename("age_group" = "aldrar") |>
+        dplyr::mutate("age_group" = dplyr::if_else(.data$aldrar == "0-9", "00-09", .data$aldrar)) |>
+        dplyr::select("age_group", tidyselect::matches(r"{202\dV\d+}")) |>
         tidyr::pivot_longer(!"age_group", values_to = "n_admission",
                             names_to = "week", names_transform = ~ stringr::str_replace(., "V", "-W"))
 
