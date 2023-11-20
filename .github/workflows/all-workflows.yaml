@@ -3,16 +3,17 @@
 on:
   push:
   pull_request:
+    branches: [main]
   release:
   workflow_dispatch:
 
-name: Run all workflows
+name: Run all
 
 jobs:
 
   # We call the reuseable workflow that triggers all AEF-DDF workflows
   run-all-AEF-DFF-workflows:
-    name: ⚙️ Run all AEF-DDF workflows
+    name: ⚙️ Call dispatcher
     uses: ssi-dk/AEF-DDF/.github/workflows/workflow-dispatcher.yaml@workflows
     with:
       # We pass information about the triggering event
