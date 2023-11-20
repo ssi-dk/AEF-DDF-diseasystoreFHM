@@ -4,12 +4,12 @@
 \name{diseasystoreFHM-package}
 \alias{diseasystoreFHM}
 \alias{diseasystoreFHM-package}
-\title{diseasystoreFHM: diseasystore extensions for the Swedish Folkhälsomyndigheten}
+\title{diseasystoreFHM: diseasystore extensions for the Swedish Folkh\u00E4lsomyndigheten}
 \description{
-This package extends the `diseasy` feature store data model with additional data from the Swedish FolkhÃ¤lsomyndigheten (public health institute of Sweden).
+This package extends the `diseasy` feature store data model with additional data from the Swedish Folkh\u00E4lsomyndigheten (public health institute of Sweden).
 }
 \author{
-\strong{Maintainer}: Rasmus Skytte RandlÃ¸v \email{rske@ssi.dk} (\href{https://orcid.org/0000-0002-5860-3838}{ORCID})
+\strong{Maintainer}: Rasmus Skytte Randløv \email{rske@ssi.dk} (\href{https://orcid.org/0000-0002-5860-3838}{ORCID})
 
 Authors:
 \itemize{

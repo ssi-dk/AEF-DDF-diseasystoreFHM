@@ -1,5 +1,5 @@
 Package: diseasystoreFHM
-Title: diseasystore extensions for the Swedish Folkhälsomyndigheten
+Title: diseasystore extensions for the Swedish Folkh\u00E4lsomyndigheten
 Version: 0.1.0
 Authors@R:
     c(person("Rasmus Skytte", "Randl\u00F8v", , "rske@ssi.dk", c("aut", "cre"),
@@ -8,7 +8,7 @@ Authors@R:
              comment = c(ORCID = "0000-0002-6258-8212")))
 Description:
     This package extends the `diseasy` feature store data model with additional data from the Swedish
-    Folkhälsomyndigheten (public health institute of Sweden).
+    Folkh\u00E4lsomyndigheten (public health institute of Sweden).
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

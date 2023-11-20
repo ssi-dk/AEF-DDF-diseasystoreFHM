@@ -13,18 +13,18 @@ knitr::opts_chunk$set(
 )
 ```
 
-# diseasystoreFSM
+# diseasystoreFHM
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of diseasystoreFSM is to ...
+The goal of diseasystoreFHM is to ...
 
 ## Installation
 
-You can install the development version of diseasystoreFSM from [GitHub](https://github.com/) with:
+You can install the development version of diseasystoreFHM from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("ssi-dk/AEF-DDF-diseasystoreFSM")
+devtools::install_github("ssi-dk/AEF-DDF-diseasystoreFHM")
 ```
