@@ -30,6 +30,10 @@ FeatureHandlers
 Fhm
 Folkhalsomyndigheten
 
+gov
+
+IDB
+
 Lasse
 
 tbl
@@ -47,6 +51,7 @@ PascalCase
 POSIXct
 pid
 
+Randl
 Rasmus
 regex
 rm

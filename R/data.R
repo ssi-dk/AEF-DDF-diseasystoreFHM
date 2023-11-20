@@ -1,4 +1,4 @@
-#' Swedens population
+#' Sweden's population
 #'
 #' This data set contains population data for Sweden extracted from the US Census Bureaus International Database (IDB).
 #' The data is stratified in 10-year age groups.

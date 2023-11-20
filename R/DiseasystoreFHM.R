@@ -1,4 +1,4 @@
-#' @title feature store handler of Swedish FHMs data
+#' @title feature store handler of Swedish Folkhalsomyndigheten data
 #'
 #' @description
 #'   This `DiseasystoreFhm` [R6][R6::R6Class] brings support for using the Swedish FHM data.
