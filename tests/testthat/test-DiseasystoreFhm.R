@@ -1,10 +1,10 @@
-test_that("DiseasystoreFHM works", {
+test_that("DiseasystoreFhm works", {
 
   library(diseasystore)
 
   # Check we can read the data directly online
   if (curl::has_internet()) {
-    expect_no_error(ds <- DiseasystoreFHM$new(
+    expect_no_error(ds <- DiseasystoreFhm$new(
       target_conn = DBI::dbConnect(RSQLite::SQLite()),
       start_date = as.Date("2020-03-02"),
       end_date = as.Date("2020-03-02"),
@@ -16,7 +16,7 @@ test_that("DiseasystoreFHM works", {
   }
 
   # Then we create a temporary directory for the Folkesundhedsmyndigheden data
-  remote_conn <- options() %.% diseasystore.DiseasystoreFHM.remote_conn
+  remote_conn <- options() %.% diseasystore.DiseasystoreFhm.remote_conn
 
   tmp_dir <- stringr::str_replace_all(tempdir(), r"{\\}", .Platform$file.sep)
 
@@ -27,7 +27,7 @@ test_that("DiseasystoreFHM works", {
   }
 
   target_conn <- \() DBI::dbConnect(RSQLite::SQLite(), sqlite_path)
-  options(diseasystore.DiseasystoreFHM.target_conn = target_conn)
+  options(diseasystore.DiseasystoreFhm.target_conn = target_conn)
 
 
   # Then we download the first n rows of each data set of interest
@@ -38,14 +38,14 @@ test_that("DiseasystoreFHM works", {
 
   source_conn <- paste0(tmp_dir, .Platform$file.sep, names(remote_conn), ".csv")
   names(source_conn) <- names(remote_conn)
-  options(diseasystore.DiseasystoreFHM.source_conn = source_conn)
+  options(diseasystore.DiseasystoreFhm.source_conn = source_conn)
 
 
   # Initialize without start_date and end_date
-  expect_no_error(ds <- DiseasystoreFHM$new(verbose = FALSE))
+  expect_no_error(ds <- DiseasystoreFhm$new(verbose = FALSE))
 
   # Check feature store has been created
-  checkmate::expect_class(ds, "DiseasystoreFHM")
+  checkmate::expect_class(ds, "DiseasystoreFhm")
   expect_equal(ds %.% label, "FHM")
 
 

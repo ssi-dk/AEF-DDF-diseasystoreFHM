@@ -112,7 +112,7 @@ fhm_admission_ <- function() {
       # Fully trim
       out <- out |>
         dplyr::filter(start_date <= date, date <= end_date) |>
-        dplyr::transmute(.data$date, .data$age_group, .data$n_admission,
+        dplyr::transmute(.data$age_group, .data$n_admission,
                          "valid_from" = .data$date, "valid_until" = .data$date + lubridate::days(1))
 
       return(out)
