@@ -2,7 +2,7 @@ Package: diseasystoreFHM
 Title: diseasystore extensions for the Swedish Folkhälsomyndigheten
 Version: 0.1.0
 Authors@R:
-    c(person("Rasmus Skytte", "Randløv", , "rske@ssi.dk", c("aut", "cre"),
+    c(person("Rasmus Skytte", "Randl\u00F8v", , "rske@ssi.dk", c("aut", "cre"),
             comment = c(ORCID = "0000-0002-5860-3838")),
       person("Kaare", "Gr\u00E6sb\u00F8ll", , "kagr@ssi.dk", role = c("aut"),
              comment = c(ORCID = "0000-0002-6258-8212")))

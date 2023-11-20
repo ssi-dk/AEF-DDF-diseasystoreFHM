@@ -15,8 +15,10 @@ DBIConnection
 DBIDriver
 dbplyr
 diseasy
+diseasystore
 DiseasystoreBase
 DiseasystoreGoogleCovid
+diseasystoreFHM
 diseasystores
 dplyr
 dtplyr
@@ -25,6 +27,8 @@ Engbo
 
 FeatureHandler
 FeatureHandlers
+Fhm
+Folkhälsomyndigheten
 
 Lasse
 
